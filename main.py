@@ -13,11 +13,9 @@ import requests
 
 def create_similarity():
     data = pd.read_csv('final_data.csv')
-    # creating a count matrix
-    cv = CountVectorizer()
+    cv = CountVectorizer()          # creating a count matrix
     count_matrix = cv.fit_transform(data['combo'])
-    # creating a similarity score matrix
-    similarity = cosine_similarity(count_matrix)
+    similarity = cosine_similarity(count_matrix)    # creating a similarity score matrix
     return data, similarity
 
 
@@ -30,7 +28,7 @@ def rcmd(m):
         data, similarity = create_similarity()
     if m not in data['Title'].unique():
         return (
-            'Sorry! The mahi movie you requested is not in our database. Please check the spelling or try with some other movies')
+            'Sorry! The Movie you requested is not in our database. Please check the spelling or try with some other movies')
     else:
         i = data.loc[data['Title'] == m].index[0]
         lst = list(enumerate(similarity[i]))
@@ -43,28 +41,25 @@ def rcmd(m):
         return l
 
 
-# converting list of string to list (eg. "["abc","def"]" to ["abc","def"])
+# converting list of string to list 
+# (eg. "["abc","def"]" to ["abc","def"])
 def convert_to_list(my_list):
     my_list = my_list.split('","')
     my_list[0] = my_list[0].replace('["', '')
     my_list[-1] = my_list[-1].replace('"]', '')
     return my_list
 
-
 def get_suggestions():
     data = pd.read_csv('final_data.csv')
     return list(data['Title'].str.capitalize())
 
-
 app = Flask(__name__)
-
 
 @app.route("/")
 @app.route("/home")
 def home():
     suggestions = get_suggestions()
     return render_template('home.html', suggestions=suggestions)
-
 
 @app.route("/similarity", methods=["POST"])
 def similarity():
@@ -79,24 +74,21 @@ def similarity():
 
 @app.route("/recommend", methods=["POST"])
 def recommend():
-    # getting data from AJAX request
+    # getting all the required data from AJAX request.
     title = request.form['title']
     imdb_id = request.form['imdb_id']
     poster = request.form['poster']
     genres = request.form['genres']
     overview = request.form['overview']
     vote_count = request.form['vote_count']
-    
     runtime = request.form['runtime']
     
-
     rec_movies = request.form['rec_movies']
     rec_posters = request.form['rec_posters']
     rec_trailer = request.form['rec_trailer']
     print('------------------------------------------------------')
-    # get movie suggestions for auto complete
-    suggestions = get_suggestions()
-
+    
+    suggestions = get_suggestions() # get movie suggestions for auto complete
 
     # call the convert_to_list function for every string that needs to be converted to list
     rec_movies = convert_to_list(rec_movies)
@@ -113,14 +105,10 @@ def recommend():
     return render_template('recommend.html', title=title, poster=poster, overview=overview,
                            vote_count=vote_count,
                            genres=genres,
-                           
                            runtime = runtime,
                            
-
                            movie_cards=movie_cards,
                            movie_trailers = movie_trailer , rec_movies = rec_movies , rec_trailer  = rec_trailer , rec_posters = rec_posters)
 
 
-
-if __name__ == '__main__':
-    app.run(debug=True)
+app.run(debug=True)
